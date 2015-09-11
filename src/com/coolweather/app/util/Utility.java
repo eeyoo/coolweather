@@ -1,13 +1,24 @@
 package com.coolweather.app.util;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.coolweather.app.db.CoolWeatherDB;
 import com.coolweather.app.model.City;
 import com.coolweather.app.model.Country;
 import com.coolweather.app.model.Province;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 public class Utility {
 
@@ -63,6 +74,13 @@ public class Utility {
 		return false;
 	}
 	
+	/**
+	 * 处理服务器返回的县级数据
+	 * @param coolWeatherDB
+	 * @param response
+	 * @param cityId
+	 * @return
+	 */
 	public synchronized static boolean handleCountriesResponse(CoolWeatherDB coolWeatherDB,
 			String response, int cityId) {
 		if (!TextUtils.isEmpty(response)) {
@@ -81,5 +99,75 @@ public class Utility {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * 解析服务器返回的JSON数据并存储到本地
+	 * @param context
+	 * @param response
+	 * @return
+	 */
+	public synchronized static void handleWeatherResponse(Context context, String response) {
+		try {			
+			JSONObject jsonObject = new JSONObject(response);
+			JSONObject weatherInfo = jsonObject.getJSONObject("weatherinfo");
+			String cityName = weatherInfo.getString("city");
+			String weatherCode = weatherInfo.getString("cityid");
+			String temp1 = weatherInfo.getString("temp");
+			String temp2 = "null";
+			String windDirect = weatherInfo.getString("WD");
+			String windLevel = weatherInfo.getString("WS");
+			String weatherDesp = weatherInfo.getString("njd");
+			String publishTime = weatherInfo.getString("time");		
+			
+			// 保存到共享文件中
+			saveWeatherInfo(context, cityName, weatherCode, temp1, temp2, windDirect, windLevel, weatherDesp, publishTime);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			Log.i("feilin", "JSON解析错误 "+e.toString());
+		}
+	}
+	
+	/**
+	 * 将服务器返回的所有天气信息存储到SharedPreferences文件中
+	 */
+	public static void saveWeatherInfo(Context context, String cityName, String weatherCode, 
+			String temp1, String temp2, String windDirect, String windLevel, String weatherDesp, String publishTime) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
+		
+		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit(); //打开编辑文件开始写入数据
+		editor.putBoolean("city_selected", true);
+		editor.putString("city_name", cityName);
+		editor.putString("weather_code", weatherCode);
+		editor.putString("temp1", temp1);
+		editor.putString("temp2", temp2);
+		editor.putString("wind_direct", windDirect);
+		editor.putString("wind_level", windLevel);
+		editor.putString("weather_desp", weatherDesp);
+		editor.putString("publish_time", publishTime);
+		editor.putString("current_date", sdf.format(new Date()));
+		editor.commit(); //提交写入内容
+	}
+	
+	/**
+	 * 中国天气API挂了，使用百度API Store的全球天气API
+	 */
+	public synchronized static void handleBaiduWeatherResponse(Context context, String response) {
+		try {
+			JSONObject jsonObject = new JSONObject(response);
+			JSONArray weatherArray = jsonObject.getJSONArray("HeWeather data service 3.0");
+			//JSONObject weatherIfo = jsonObject.getJSONObject("HeWeather data service 3.0");
+			//JSONArray jsonArray = new JSONArray();
+			JSONObject weatherInfo = weatherArray.getJSONObject(0);
+			JSONObject basic = weatherInfo.getJSONObject("basic");
+			String cityName = basic.getString("city");
+			Log.i("feilin", cityName);
+			
+			
+		} catch (JSONException e) {
+			e.printStackTrace();
+			Log.i("feilin", "百度JSON解析错误 "+e.toString());
+		}
 	}
 }
