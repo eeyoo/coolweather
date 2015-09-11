@@ -10,16 +10,21 @@ import com.coolweather.app.util.Utility;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class WeatherActivity extends Activity {
+public class WeatherActivity extends Activity implements OnClickListener {
 
 	private LinearLayout weatherInfoLayout;
 	/**
@@ -48,6 +53,16 @@ public class WeatherActivity extends Activity {
 	 */
 	private TextView currentDateText;
 	
+	/**
+	 * 快速切换城市按钮
+	 */
+	private Button switchCityBtn;
+	
+	/**
+	 * 更新天气按钮
+	 */
+	private Button refreshWeatherBtn;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -64,6 +79,11 @@ public class WeatherActivity extends Activity {
 		temp1Text = (TextView) findViewById(R.id.temp1);
 		temp2Text = (TextView) findViewById(R.id.temp2);
 		currentDateText = (TextView) findViewById(R.id.current_date);
+		
+		switchCityBtn = (Button) findViewById(R.id.switch_city);
+		switchCityBtn.setOnClickListener(this);
+		refreshWeatherBtn = (Button) findViewById(R.id.refresh_weather);
+		refreshWeatherBtn.setOnClickListener(this);
 		
 		String countryCode = getIntent().getExtras().getString("country_code");
 		Log.i("feilin", "coutry code " + countryCode);
@@ -209,5 +229,28 @@ public class WeatherActivity extends Activity {
 				
 			}
 		});
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.switch_city:
+			//Toast.makeText(WeatherActivity.this, "切换城市", 1).show();
+			Intent intent = new Intent(this, ChooseAreaActivity.class);
+			intent.putExtra("from_weather_acitvity", true);
+			startActivity(intent);
+			finish();
+			break;
+		case R.id.refresh_weather:
+			//Toast.makeText(this, "玩命更新中...", 1).show();
+			publishTimeText.setText("玩命更新中...");
+			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+			String weatherCode = preferences.getString("weather_code", "");
+			queryWeatherInfo(weatherCode);
+			break;
+
+		default:
+			break;
+		}
 	}
 }

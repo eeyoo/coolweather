@@ -66,7 +66,9 @@ public class ChooseAreaActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		/*SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean test = preferences.getBoolean("city_selected", false);
+		String cityName = preferences.getString("city_name", "");
 		Log.i("feilin", "city selected "+test);
+		Log.i("feilin", "city selected "+cityName);
 		if (test) {//开始改条件不会执行，默认为false
 			Intent intent = new Intent(this, WeatherActivity.class);
 			intent.putExtra("country_code", "110101"); //西安

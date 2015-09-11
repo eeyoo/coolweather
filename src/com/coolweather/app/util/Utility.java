@@ -135,6 +135,7 @@ public class Utility {
 	public static void saveWeatherInfo(Context context, String cityName, String weatherCode, 
 			String temp1, String temp2, String windDirect, String windLevel, String weatherDesp, String publishTime) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
+		Log.i("feilin", "天气信息存储到SharedPreferences文件");
 		
 		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit(); //打开编辑文件开始写入数据
 		editor.putBoolean("city_selected", true);
