@@ -1,16 +1,13 @@
 package com.coolweather.app.acttivity;
 
-
-import java.security.Timestamp;
-
 import com.coolweather.app.R;
+import com.coolweather.app.service.AutoUpdateService;
 import com.coolweather.app.util.HttpCallbackListener;
 import com.coolweather.app.util.HttpUtil;
 import com.coolweather.app.util.Utility;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -22,7 +19,6 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class WeatherActivity extends Activity implements OnClickListener {
 
@@ -65,12 +61,11 @@ public class WeatherActivity extends Activity implements OnClickListener {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
+
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE); //去掉自带title
 		setContentView(R.layout.weather_info_layout);
 		//初始化UI控件
-		//Log.i("feilin", "LinearLayout ");
 		weatherInfoLayout = (LinearLayout) findViewById(R.id.weather_info_layout);
 		Log.i("feilin", "LinearLayout ");
 		cityNameText = (TextView) findViewById(R.id.city_name);
@@ -93,16 +88,16 @@ public class WeatherActivity extends Activity implements OnClickListener {
 			weatherInfoLayout.setVisibility(View.INVISIBLE);
 			cityNameText.setVisibility(View.INVISIBLE);
 			//县级代号获取服务器天气信息
-			//Log.i("feilin", "去服务器获取天气信息");
 			queryWeatherCode(countryCode);
 			
 		} else {
 			//无县级代号就读取本地天气信息
-			//Log.i("feilin", "获取本地天气信息");
-			//Log.i("feilin", "显示本地天气信息");
 			showWeather();
 		}
 		
+		//启动定时更新天气服务
+		Intent updateService = new Intent(this, AutoUpdateService.class);
+		startService(updateService);
 	}
 	
 	/**
@@ -134,9 +129,8 @@ public class WeatherActivity extends Activity implements OnClickListener {
 			
 			@Override
 			public void onFinish(String response) {
-				//Log.i("feilin", "onFinish");
 				if ("countryCode".equals(type)) {
-					//Log.i("feilin", "type countryCode "+type);
+
 					if (!TextUtils.isEmpty(response)) {
 						
 						String[] array = response.split("\\|");
@@ -147,8 +141,7 @@ public class WeatherActivity extends Activity implements OnClickListener {
 					}
 				} else if ("weatherCode".equals(type)) {//获取本地天气信息
 					//传入天气代号时
-					//Log.i("feilin", "address "+address);
-					//Log.i("feilin", "response "+response);
+
 					Utility.handleWeatherResponse(WeatherActivity.this, response);
 					runOnUiThread(new Runnable() {
 						
@@ -163,7 +156,6 @@ public class WeatherActivity extends Activity implements OnClickListener {
 			
 			@Override
 			public void onError(Exception e) {
-				//Log.i("feilin", "onError");
 				e.printStackTrace();
 				runOnUiThread(new Runnable() {
 					
@@ -180,18 +172,18 @@ public class WeatherActivity extends Activity implements OnClickListener {
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		String cityName = preferences.getString("city_name", "null");
 		String publishTime = preferences.getString("publish_time", "null");
-		String weatherCode = preferences.getString("weather_code", "null");
+		//String weatherCode = preferences.getString("weather_code", "null");
 		String weatherDesp = preferences.getString("weather_desp", "null");
 		String temp1 = preferences.getString("temp1", "null");
 		String temp2 = preferences.getString("temp2", "null");
 		String currentDate = preferences.getString("current_date", "null");
-		Log.i("feilin", "city name "+cityName);
+		/*Log.i("feilin", "city name "+cityName);
 		Log.i("feilin", "publist time "+publishTime);
 		Log.i("feilin", "weather code "+weatherCode);
 		Log.i("feilin", "weather desp "+weatherDesp);
 		Log.i("feilin", "min temp "+temp1);
 		Log.i("feilin", "max temp "+temp2);
-		Log.i("feilin", "current date "+currentDate);
+		Log.i("feilin", "current date "+currentDate);*/
 		
 		cityNameText.setText(cityName);
 		publishTimeText.setText("今天" + publishTime + "发布");
@@ -202,6 +194,7 @@ public class WeatherActivity extends Activity implements OnClickListener {
 		
 		weatherInfoLayout.setVisibility(View.VISIBLE);
 		cityNameText.setVisibility(View.VISIBLE);
+
 	}
 	
 	
