@@ -67,7 +67,7 @@ public class WeatherActivity extends Activity implements OnClickListener {
 		setContentView(R.layout.weather_info_layout);
 		//初始化UI控件
 		weatherInfoLayout = (LinearLayout) findViewById(R.id.weather_info_layout);
-		Log.i("feilin", "LinearLayout ");
+		//Log.i("feilin", "LinearLayout ");
 		cityNameText = (TextView) findViewById(R.id.city_name);
 		publishTimeText = (TextView) findViewById(R.id.publish_text);		
 		weatherDespText = (TextView) findViewById(R.id.weather_desp);
@@ -81,7 +81,7 @@ public class WeatherActivity extends Activity implements OnClickListener {
 		refreshWeatherBtn.setOnClickListener(this);
 		
 		String countryCode = getIntent().getExtras().getString("country_code");
-		Log.i("feilin", "coutry code " + countryCode);
+		//Log.i("feilin", "coutry code " + countryCode);
 		if (!TextUtils.isEmpty(countryCode)) {
 			//有县级代号就去查询天气
 			publishTimeText.setText("正在同步中...");
